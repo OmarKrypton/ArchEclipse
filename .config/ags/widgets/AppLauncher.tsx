@@ -244,7 +244,7 @@ const Entry = () => (
                   app_type: "app",
                   app_arg: args.join(" "),
                   app_launch: () =>
-                    !args.join("")
+                    !args.join("") && app.executable !== "thunar"
                       ? app.launch()
                       : hyprland.message_async(
                           `dispatch exec ${app.executable} ${args.join(" ")}`,
