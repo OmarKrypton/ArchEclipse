@@ -1,4 +1,5 @@
 import Gtk from "gi://Gtk?version=4.0";
+import Gdk from "gi://Gdk?version=4.0";
 import { focusedWorkspace, specialWorkspace } from "../../../variables";
 
 import Hyprland from "gi://AstalHyprland";
@@ -234,6 +235,16 @@ function Workspaces() {
   // Render the workspaces container with bound workspace elements
   return (
     <box class="workspaces-display">
+      <Gtk.EventControllerScroll
+        flags={Gtk.EventControllerScrollFlags.VERTICAL}
+        onScroll={(_, dx, dy) => {
+          if (dy > 0) {
+            hyprland.message_async("dispatch workspace +1", () => {});
+          } else if (dy < 0) {
+            hyprland.message_async("dispatch workspace -1", () => {});
+          }
+        }}
+      />
       <For each={workspaces}>
         {(workspace, index: Accessor<number>) => workspace}
       </For>
