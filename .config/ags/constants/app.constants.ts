@@ -70,13 +70,13 @@ export const quickApps: LauncherApp[] = [
   },
   {
     app_name: "Terminal",
-    app_launch: () => execAsync("bash -c 'foot --working-directory=$HOME'"),
-    app_icon: "",
+    app_launch: () => execAsync("bash -c 'cd $HOME && foot'"),
+    app_icon: "",
   },
   {
     app_name: "Files",
     app_launch: () => execAsync("bash -c 'thunar $HOME'"),
-    app_icon: "",
+    app_icon: "",
   },
   {
     app_name: "Calculator",
