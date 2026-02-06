@@ -193,9 +193,9 @@ const MovieGrid = () => (
     <box class="movie-grid" orientation={Gtk.Orientation.VERTICAL} spacing={15}>
       <For each={movieList}>
         {(movie, index) => {
-          // Group movies into rows of 3
-          if (index.get() % 3 === 0) {
-            const rowMovies = movieList.get().slice(index.get(), index.get() + 3);
+          // Group movies into rows of 2
+          if (index.get() % 2 === 0) {
+            const rowMovies = movieList.get().slice(index.get(), index.get() + 2);
             return (
               <box spacing={10} homogeneous>
                 {rowMovies.map((m) => (
@@ -212,11 +212,8 @@ const MovieGrid = () => (
 );
 
 export default () => {
-  // Initialize on first render
-  if (!initialized.get()) {
-    fetchTrending();
-    setInitialized(true);
-  }
+  // Always fetch when component mounts
+  fetchTrending();
 
   return (
     <box
