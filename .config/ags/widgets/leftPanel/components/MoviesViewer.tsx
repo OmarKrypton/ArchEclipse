@@ -208,6 +208,11 @@ const MovieGrid = () => (
             child = next;
           }
           
+          // Check if movies is valid
+          if (!movies || !Array.isArray(movies)) {
+            return;
+          }
+          
           // Add movie cards
           movies.forEach((movie) => {
             const card = MovieCard({ movie });
