@@ -17,6 +17,7 @@ const workspaceIconMap: { [name: string]: string } = {
   zen: "󰖟",
   firefox: "󰈹",
   code: "",
+  antigravity: "",
   foot: "",
   ranger: "󰉋",
   thunar: "󰉋",
@@ -123,7 +124,7 @@ function Workspaces() {
         class={classes.join(" ")}
         label={icon}
         onClicked={() =>
-          hyprland.message_async(`dispatch workspace ${id}`, () => {})
+          hyprland.message_async(`dispatch workspace ${id}`, () => { })
         }
         // tooltipMarkup={`switch to workspace ${id} [${client_class}]`}
         tooltipMarkup={`Workspace ${id} [${client_class}]\n<b>SUPER + ${id}</b>`}
@@ -161,9 +162,8 @@ function Workspaces() {
       if (currentGroup.length > 0) {
         groupElements.push(
           <box
-            class={`workspace-group ${
-              currentGroupIsActive ? "active" : "inactive"
-            }`}
+            class={`workspace-group ${currentGroupIsActive ? "active" : "inactive"
+              }`}
           >
             {currentGroup}
           </box>,
@@ -242,9 +242,9 @@ function Workspaces() {
         flags={Gtk.EventControllerScrollFlags.VERTICAL}
         onScroll={(_, dx, dy) => {
           if (dy > 0) {
-            hyprland.message_async("dispatch workspace +1", () => {});
+            hyprland.message_async("dispatch workspace +1", () => { });
           } else if (dy < 0) {
-            hyprland.message_async("dispatch workspace -1", () => {});
+            hyprland.message_async("dispatch workspace -1", () => { });
           }
         }}
       />
@@ -262,7 +262,7 @@ const Special = () => (
     )}
     label={workspaceIconMap["special"]}
     onClicked={() =>
-      hyprland.message_async(`dispatch togglespecialworkspace`, (res) => {})
+      hyprland.message_async(`dispatch togglespecialworkspace`, (res) => { })
     }
     tooltipMarkup={`Special Workspace\n<b>SUPER + S</b>`}
   />
@@ -273,7 +273,7 @@ const OverView = () => (
     class="overview"
     label={workspaceIconMap["overview"]}
     onClicked={() =>
-      hyprland.message_async("dispatch hyprexpo:expo toggle", (res) => {})
+      hyprland.message_async("dispatch hyprexpo:expo toggle", (res) => { })
     }
     tooltipMarkup={`Overview Mode\n<b>SUPER + SHIFT + TAB</b>`}
   />
