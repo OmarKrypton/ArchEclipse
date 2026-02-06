@@ -20,15 +20,18 @@ const workspaceIconMap: { [name: string]: string } = {
   foot: "",
   ranger: "󰉋",
   thunar: "󰉋",
+  nautilus: "󰉋",
   vlc: "󰕾",
   "spotify-launcher": "",
   spotify: "",
+  spotube: "",
   systemmonitor: "",
   discord: "󰙯",
   vencord: "󰙯",
   legcord: "󰙯",
   vesktop: "󰙯",
   steam: "󰓓",
+  lutris: "",
   game: "",
 };
 
