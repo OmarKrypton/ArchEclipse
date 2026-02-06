@@ -42,7 +42,7 @@ function addUserToInputGroup() {
               body: "Will be Logging out to apply changes. in 5 seconds...",
             });
             timeout(5000, () => {
-              hyprland.message_async("dispatch exit", () => {});
+              hyprland.message_async("dispatch exit", () => { });
             });
           })
           .catch((err) => notify({ summary: "Error", body: err.toString() }));
@@ -71,8 +71,7 @@ const detectFileManagers = async () => {
   for (const fm of fileManagerOptions) {
     try {
       const result = await execAsync(
-        `bash -c "command -v ${
-          fm.command.split(" ")[0]
+        `bash -c "command -v ${fm.command.split(" ")[0]
         } >/dev/null 2>&1 && echo 'yes' || echo 'no'"`,
       );
       if (result.trim() === "yes") {
@@ -392,7 +391,17 @@ const Setting = ({
                   for (const key of keys) {
                     current = current[key];
                   }
-                  return current.value === choice.value;
+                  // compare current value with choice value (in case of array, compare arrays)
+                  return (
+                    current.value === choice.value ||
+                    (Array.isArray(current.value) &&
+                      Array.isArray(choice.value) &&
+                      current.value.length === choice.value.length &&
+                      current.value.every(
+                        (val: any, index: number) =>
+                          val === choice.value[index],
+                      ))
+                  );
                 })}
                 onToggled={({ active }) => {
                   if (active) {
