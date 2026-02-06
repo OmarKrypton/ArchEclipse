@@ -15,6 +15,7 @@ const [progressStatus, setProgressStatus] = createState<
 const [currentTab, setCurrentTab] = createState<string>("Trending");
 const [searchQuery, setSearchQuery] = createState<string>("");
 const [currentPage, setCurrentPage] = createState<number>(1);
+const [bottomIsRevealed, setBottomIsRevealed] = createState<boolean>(false);
 
 const scriptPath = "./scripts/movies.py";
 
@@ -98,7 +99,7 @@ const searchMovies = async (query: string, page: number = 1) => {
 const openInStremio = (movie: Movie) => {
   const title = movie.title || movie.name || "";
   const year = movie.release_date?.split("-")[0] || movie.first_air_date?.split("-")[0] || "";
-  
+
   execAsync(`bash -c 'command -v stremio && stremio "https://web.stremio.com/#/search?search=${encodeURIComponent(title)}" || xdg-open "https://web.stremio.com/#/search?search=${encodeURIComponent(title)}"'`)
     .catch(() => {
       const type = movie.media_type === "tv" ? "tv" : "movie";
@@ -112,7 +113,7 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
   const rating = movie.vote_average?.toFixed(1) || "N/A";
   const type = movie.media_type === "tv" ? "TV" : "Movie";
   const posterUrl = movie.poster_url || "";
-  
+
   return (
     <button
       class="movie-card"
@@ -130,8 +131,8 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
             <label label="No Image" />
           </box>
         )}
-        <label 
-          label={title} 
+        <label
+          label={title}
           ellipsize={Pango.EllipsizeMode.END}
           maxWidthChars={15}
         />
@@ -151,16 +152,15 @@ const SearchBar = () => (
     />
     <button
       class="action-button"
-      label=""
+      label=""
       onClicked={() => searchMovies(searchQuery.get())}
     />
   </box>
 );
 
 const TabButtons = () => (
-  <box class="tab-buttons" spacing={5}>
+  <box class="tab-list" spacing={5}>
     <togglebutton
-      class={currentTab((tab) => tab === "Trending" ? "active" : "")}
       active={currentTab((tab) => tab === "Trending")}
       label="Trending"
       onToggled={({ active }) => {
@@ -171,7 +171,6 @@ const TabButtons = () => (
       }}
     />
     <togglebutton
-      class={currentTab((tab) => tab === "Movies" ? "active" : "")}
       active={currentTab((tab) => tab === "Movies")}
       label="Movies"
       onToggled={({ active }) => {
@@ -182,7 +181,6 @@ const TabButtons = () => (
       }}
     />
     <togglebutton
-      class={currentTab((tab) => tab === "TV Shows" ? "active" : "")}
       active={currentTab((tab) => tab === "TV Shows")}
       label="TV Shows"
       onToggled={({ active }) => {
@@ -199,7 +197,7 @@ const Pagination = () => (
   <box class="pagination" spacing={5} halign={Gtk.Align.CENTER}>
     <button
       class="action-button"
-      label=""
+      label=""
       onClicked={() => {
         const page = Math.max(1, currentPage.get() - 1);
         if (currentTab.get() === "Trending") fetchTrending(page);
@@ -207,13 +205,10 @@ const Pagination = () => (
         else if (currentTab.get() === "TV Shows") fetchPopularTV(page);
       }}
     />
-    <label 
-      class="page-indicator"
-      label={currentPage((p) => `Page ${p}`)} 
-    />
+    <label class="page-indicator" label={currentPage((p: number) => `Page ${p}`)} />
     <button
       class="action-button"
-      label=""
+      label=""
       onClicked={() => {
         const page = currentPage.get() + 1;
         if (currentTab.get() === "Trending") fetchTrending(page);
@@ -224,23 +219,64 @@ const Pagination = () => (
   </box>
 );
 
+const Bottom = () => {
+  const revealer = (
+    <revealer
+      class="bottom-revealer"
+      transitionType={Gtk.RevealerTransitionType.SWING_UP}
+      revealChild={bottomIsRevealed}
+      transitionDuration={globalTransition}
+    >
+      <box
+        class="bottom-bar"
+        orientation={Gtk.Orientation.VERTICAL}
+        spacing={10}
+      >
+        <Pagination />
+        <SearchBar />
+      </box>
+    </revealer>
+  );
+
+  // action box
+  const actions = (
+    <box class="actions" spacing={5}>
+      <button
+        hexpand
+        class="reveal-button"
+        label={bottomIsRevealed((revealed: boolean) => (!revealed ? "" : ""))}
+        onClicked={() => {
+          setBottomIsRevealed(!bottomIsRevealed.get());
+        }}
+      />
+    </box>
+  );
+
+  return (
+    <box class={"bottom"} orientation={Gtk.Orientation.VERTICAL}>
+      {actions}
+      {revealer}
+    </box>
+  );
+};
+
 const MovieGrid = () => (
-  <Gtk.ScrolledWindow 
-    vexpand 
+  <Gtk.ScrolledWindow
+    vexpand
     hscrollbarPolicy={Gtk.PolicyType.NEVER}
     vscrollbarPolicy={Gtk.PolicyType.AUTOMATIC}
   >
-    <box 
-      class="movie-grid" 
+    <box
+      class="movie-grid"
       orientation={Gtk.Orientation.VERTICAL}
       spacing={15}
     >
       <With value={movieList}>
-        {(movies) => {
+        {(movies: Movie[]) => {
           if (!movies || !Array.isArray(movies) || movies.length === 0) {
             return <box />;
           }
-          
+
           return (
             <box orientation={Gtk.Orientation.VERTICAL} spacing={15}>
               {movies.reduce((acc: JSX.Element[], movie, idx) => {
@@ -271,14 +307,30 @@ export default () => {
     <box
       orientation={Gtk.Orientation.VERTICAL}
       class="movies-viewer"
-      spacing={10}
+      spacing={5}
       vexpand
+      $={(self: any) => {
+        const keyController = new Gtk.EventControllerKey();
+        keyController.connect("key-pressed", (_: any, keyval: number) => {
+          if (keyval === Gdk.KEY_Up && !bottomIsRevealed.get()) {
+            setBottomIsRevealed(true);
+            return true;
+          }
+          if (keyval === Gdk.KEY_Down && bottomIsRevealed.get()) {
+            setBottomIsRevealed(false);
+            return true;
+          }
+          return false;
+        });
+        self.add_controller(keyController);
+      }}
     >
-      <Progress status={progressStatus} />
+      <box orientation={Gtk.Orientation.VERTICAL} vexpand>
+        <MovieGrid />
+        <Progress status={progressStatus} />
+      </box>
+      <Bottom />
       <TabButtons />
-      <SearchBar />
-      <MovieGrid />
-      <Pagination />
     </box>
   );
 };
