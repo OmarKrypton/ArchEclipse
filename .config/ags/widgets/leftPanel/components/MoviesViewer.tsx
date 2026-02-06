@@ -3,7 +3,6 @@ import { execAsync } from "ags/process";
 import { Movie } from "../../../interfaces/movie.interface";
 import { createState, For, With } from "ags";
 import { notify } from "../../../utils/notification";
-import Picture from "../../Picture";
 import { Progress } from "../../Progress";
 import Pango from "gi://Pango?version=1.0";
 import Gdk from "gi://Gdk?version=4.0";
@@ -111,6 +110,7 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
   const year = movie.release_date?.split("-")[0] || movie.first_air_date?.split("-")[0] || "";
   const rating = movie.vote_average?.toFixed(1) || "N/A";
   const type = movie.media_type === "tv" ? "TV" : "Movie";
+  const posterUrl = movie.poster_url || "";
   
   return (
     <button
@@ -118,13 +118,11 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
       onClicked={() => openInStremio(movie)}
       tooltipMarkup={`${title} (${year})\nRating: ${rating}/10\nType: ${type}\n\nClick to open in Stremio`}
     >
-      <box orientation={Gtk.Orientation.VERTICAL} spacing={5}>
-        {movie.poster_url ? (
-          <Picture
-            src={movie.poster_url}
-            width={120}
-            height={180}
-            className="movie-poster"
+      <box orientation={Gtk.Orientation.VERTICAL} spacing={5} halign={Gtk.Align.CENTER}>
+        {posterUrl ? (
+          <image
+            file={posterUrl}
+            pixelSize={180}
           />
         ) : (
           <box heightRequest={180} widthRequest={120} class="movie-placeholder">
@@ -186,45 +184,42 @@ const TabButtons = () => (
   </box>
 );
 
-const MovieGrid = () => {
-  return (
-    <Gtk.ScrolledWindow 
-      vexpand 
-      hscrollbarPolicy={Gtk.PolicyType.NEVER}
-      vscrollbarPolicy={Gtk.PolicyType.AUTOMATIC}
-    >
-      <box 
-        class="movie-grid" 
-        orientation={Gtk.Orientation.VERTICAL}
-        spacing={10}
-        $={(self) => {
-          movieList((movies) => {
-            // Clear existing
-            let child = self.get_first_child();
-            while (child) {
-              const next = child.get_next_sibling();
-              self.remove(child);
-              child = next;
-            }
-            
-            // Group movies into rows of 3
-            for (let i = 0; i < movies.length; i += 3) {
-              const rowMovies = movies.slice(i, i + 3);
-              const row = (
-                <box spacing={10} homogeneous>
-                  {rowMovies.map((movie) => (
-                    <MovieCard movie={movie} />
-                  ))}
-                </box>
-              );
-              self.append(row);
-            }
+const MovieGrid = () => (
+  <Gtk.ScrolledWindow 
+    vexpand 
+    hscrollbarPolicy={Gtk.PolicyType.NEVER}
+    vscrollbarPolicy={Gtk.PolicyType.AUTOMATIC}
+  >
+    <Gtk.FlowBox
+      class="movie-grid"
+      homogeneous={true}
+      selectionMode={Gtk.SelectionMode.NONE}
+      maxChildrenPerLine={3}
+      rowSpacing={15}
+      columnSpacing={10}
+      $={(self) => {
+        // Subscribe to movieList changes
+        movieList.subscribe((movies) => {
+          // Clear existing children
+          let child = self.get_first_child();
+          while (child) {
+            const next = child.get_next_sibling();
+            self.remove(child);
+            child = next;
+          }
+          
+          // Add movie cards
+          movies.forEach((movie) => {
+            const card = MovieCard({ movie });
+            self.append(card);
           });
-        }}
-      />
-    </Gtk.ScrolledWindow>
-  );
-};
+          
+          self.show_all();
+        });
+      }}
+    />
+  </Gtk.ScrolledWindow>
+);
 
 export default () => {
   // Initialize on first render
