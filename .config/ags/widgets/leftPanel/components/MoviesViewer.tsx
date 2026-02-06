@@ -212,18 +212,15 @@ const MovieGrid = () => (
 );
 
 export default () => {
+  // Always fetch fresh data when component mounts
+  fetchTrending();
+
   return (
     <box
       orientation={Gtk.Orientation.VERTICAL}
       class="movies-viewer"
       spacing={10}
       vexpand
-      $={(self) => {
-        // Fetch data when component mounts (widget becomes visible)
-        if (movieList.get().length === 0) {
-          fetchTrending();
-        }
-      }}
     >
       <Progress status={progressStatus} />
       <TabButtons />
