@@ -180,36 +180,40 @@ const TabButtons = () => (
   </box>
 );
 
-const MovieGrid = () => {
-  const rows: Movie[][] = [];
-  const movies = movieList.get();
-  
-  if (movies && Array.isArray(movies)) {
-    for (let i = 0; i < movies.length; i += 2) {
-      rows.push(movies.slice(i, i + 2));
-    }
-  }
-
-  return (
-    <Gtk.ScrolledWindow 
-      vexpand 
-      hscrollbarPolicy={Gtk.PolicyType.NEVER}
-      vscrollbarPolicy={Gtk.PolicyType.AUTOMATIC}
+const MovieGrid = () => (
+  <Gtk.ScrolledWindow 
+    vexpand 
+    hscrollbarPolicy={Gtk.PolicyType.NEVER}
+    vscrollbarPolicy={Gtk.PolicyType.AUTOMATIC}
+  >
+    <box 
+      class="movie-grid" 
+      orientation={Gtk.Orientation.VERTICAL}
+      spacing={15}
     >
-      <box class="movie-grid" orientation={Gtk.Orientation.VERTICAL} spacing={15}>
-        <For each={createState(rows)}>
-          {(row) => (
-            <box spacing={10} homogeneous>
-              {row.map((movie) => (
-                <MovieCard movie={movie} />
-              ))}
-            </box>
-          )}
-        </For>
-      </box>
-    </Gtk.ScrolledWindow>
-  );
-};
+      <With value={movieList}>
+        {(movies) => {
+          if (!movies || !Array.isArray(movies) || movies.length === 0) {
+            return <box />;
+          }
+          
+          const rows: JSX.Element[] = [];
+          for (let i = 0; i < movies.length; i += 2) {
+            const rowMovies = movies.slice(i, i + 2);
+            rows.push(
+              <box key={i} spacing={10} homogeneous>
+                {rowMovies.map((movie, idx) => (
+                  <MovieCard key={`${movie.id}-${idx}`} movie={movie} />
+                ))}
+              </box>
+            );
+          }
+          return <>{rows}</>;
+        }}
+      </With>
+    </box>
+  </Gtk.ScrolledWindow>
+);
 
 export default () => {
   fetchTrending();
