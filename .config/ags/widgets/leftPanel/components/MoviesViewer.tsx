@@ -120,12 +120,14 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
     >
       <box orientation={Gtk.Orientation.VERTICAL} spacing={5}>
         {movie.poster_url ? (
-          <image
-            file={movie.poster_url}
-            pixelSize={150}
+          <Picture
+            src={movie.poster_url}
+            width={120}
+            height={180}
+            className="movie-poster"
           />
         ) : (
-          <box heightRequest={150} widthRequest={100} class="movie-placeholder">
+          <box heightRequest={180} widthRequest={120} class="movie-placeholder">
             <label label="No Image" />
           </box>
         )}
@@ -184,15 +186,45 @@ const TabButtons = () => (
   </box>
 );
 
-const MovieGrid = () => (
-  <Gtk.ScrolledWindow vexpand>
-    <box class="movie-grid" spacing={10}>
-      <For each={movieList}>
-        {(movie) => <MovieCard movie={movie} />}
-      </For>
-    </box>
-  </Gtk.ScrolledWindow>
-);
+const MovieGrid = () => {
+  return (
+    <Gtk.ScrolledWindow 
+      vexpand 
+      hscrollbarPolicy={Gtk.PolicyType.NEVER}
+      vscrollbarPolicy={Gtk.PolicyType.AUTOMATIC}
+    >
+      <box 
+        class="movie-grid" 
+        orientation={Gtk.Orientation.VERTICAL}
+        spacing={10}
+        $={(self) => {
+          movieList((movies) => {
+            // Clear existing
+            let child = self.get_first_child();
+            while (child) {
+              const next = child.get_next_sibling();
+              self.remove(child);
+              child = next;
+            }
+            
+            // Group movies into rows of 3
+            for (let i = 0; i < movies.length; i += 3) {
+              const rowMovies = movies.slice(i, i + 3);
+              const row = (
+                <box spacing={10} homogeneous>
+                  {rowMovies.map((movie) => (
+                    <MovieCard movie={movie} />
+                  ))}
+                </box>
+              );
+              self.append(row);
+            }
+          });
+        }}
+      />
+    </Gtk.ScrolledWindow>
+  );
+};
 
 export default () => {
   // Initialize on first render

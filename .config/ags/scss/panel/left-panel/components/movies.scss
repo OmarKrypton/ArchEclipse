@@ -1,14 +1,14 @@
 .movies-viewer {
-  padding: 5px;
+  padding: 10px;
 
   .search-bar {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     @include module;
 
     entry {
       background: $background-semi-transparent;
       border-radius: 8px;
-      padding: 8px;
+      padding: 8px 12px;
       color: $foreground;
     }
 
@@ -25,13 +25,14 @@
   }
 
   .tab-buttons {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
 
     button {
       background: $background-semi-transparent;
       border-radius: 8px;
       padding: 8px 16px;
       color: $foreground;
+      margin-right: 5px;
 
       &.active {
         background: $blue-background;
@@ -44,31 +45,48 @@
   }
 
   .movie-grid {
-    spacing: 10px;
+    spacing: 15px;
   }
 
   .movie-card {
     background: $background-semi-transparent;
     border-radius: 12px;
-    padding: 8px;
-    min-width: 120px;
+    padding: 10px;
+    min-width: 130px;
+    transition: all 0.2s ease;
 
     &:hover {
       background: $background-mix;
+      transform: scale(1.02);
     }
 
-    image {
+    .movie-poster {
       border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
 
     label {
       font-size: 0.85em;
-      margin-top: 5px;
+      margin-top: 8px;
+      text-align: center;
 
       &.movie-meta {
         font-size: 0.75em;
         color: $grey;
+        margin-top: 4px;
       }
+    }
+  }
+
+  .movie-placeholder {
+    background: $background-mix;
+    border-radius: 8px;
+    min-height: 180px;
+    min-width: 120px;
+
+    label {
+      color: $grey;
+      font-size: 0.9em;
     }
   }
 }
