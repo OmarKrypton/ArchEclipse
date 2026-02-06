@@ -1,3 +1,1 @@
-# Add your TMDB API key here
-# Get one free at https://www.themoviedb.org/settings/api
-YOUR_API_KEY_HERE
+eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJlMDRlOTk1MzYwZWI0Mjg3YjZjYzVjYjE3Y2Y4MzlkOCIsIm5iZiI6MTc3MDQwMzczNi4wMjcsInN1YiI6IjY5ODYzNzk4YzU5MjMwZGNmMjYxYTgzNyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.u8_kQUn5dh1qEq0f4QQRreXxzJLIZvlQ2Kzz_2Zn9yk
