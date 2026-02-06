@@ -17,6 +17,7 @@ import SettingsWidget from "../widgets/leftPanel/components/SettingsWidget";
 import Calendar from "../widgets/rightPanel/components/Calendar";
 import NotificationHistory from "../widgets/rightPanel/components/NotificationHistory";
 import KeyBinds from "../widgets/leftPanel/components/KeyBinds";
+import MoviesViewer from "../widgets/leftPanel/components/MoviesViewer";
 
 export const barWidgetSelectors: WidgetSelector[] = [
   {
@@ -128,8 +129,14 @@ export const leftPanelWidgetSelectors: WidgetSelector[] = [
   },
   {
     name: "KeyBinds",
-    icon: "",
+    icon: "",
     widget: () => KeyBinds(),
+    enabled: false,
+  },
+  {
+    name: "MoviesViewer",
+    icon: "",
+    widget: () => MoviesViewer(),
     enabled: false,
   },
 ];

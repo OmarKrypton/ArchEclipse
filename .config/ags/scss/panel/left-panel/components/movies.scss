@@ -1,0 +1,90 @@
+.movies-viewer {
+  padding: 10px;
+
+  .search-bar {
+    margin-bottom: 10px;
+
+    entry {
+      background: $surface;
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: $text;
+
+      &:focus {
+        box-shadow: 0 0 0 2px $primary;
+      }
+    }
+
+    button {
+      background: $primary;
+      border-radius: 8px;
+      padding: 8px 16px;
+      color: $on-primary;
+
+      &:hover {
+        background: lighten($primary, 10%);
+      }
+    }
+  }
+
+  .tab-buttons {
+    margin-bottom: 10px;
+
+    button {
+      background: $surface;
+      border-radius: 8px;
+      padding: 8px 16px;
+      color: $text;
+
+      &.active {
+        background: $primary;
+        color: $on-primary;
+      }
+
+      &:hover {
+        background: lighten($surface, 5%);
+      }
+    }
+  }
+
+  .movie-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-start;
+  }
+
+  .movie-card {
+    background: $surface;
+    border-radius: 12px;
+    padding: 8px;
+    min-width: 120px;
+    max-width: 120px;
+
+    &:hover {
+      background: lighten($surface, 5%);
+      transform: scale(1.02);
+    }
+
+    image {
+      border-radius: 8px;
+    }
+
+    label {
+      font-size: 0.85em;
+      text-align: center;
+
+      &.movie-meta {
+        font-size: 0.75em;
+        color: $text-muted;
+      }
+    }
+  }
+
+  .movie-placeholder {
+    background: $surface-variant;
+    border-radius: 8px;
+    min-height: 150px;
+    min-width: 100px;
+  }
+}
