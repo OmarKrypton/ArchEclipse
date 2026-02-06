@@ -129,13 +129,13 @@ export const leftPanelWidgetSelectors: WidgetSelector[] = [
   },
   {
     name: "KeyBinds",
-    icon: "",
+    icon: "",
     widget: () => KeyBinds(),
     enabled: false,
   },
   {
     name: "MoviesViewer",
-    icon: "",
+    icon: "",
     widget: () => MoviesViewer(),
     enabled: false,
   },
