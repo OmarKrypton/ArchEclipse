@@ -14,13 +14,14 @@ const [progressStatus, setProgressStatus] = createState<
 >("idle");
 const [currentTab, setCurrentTab] = createState<string>("Trending");
 const [searchQuery, setSearchQuery] = createState<string>("");
+const [currentPage, setCurrentPage] = createState<number>(1);
 
 const scriptPath = "./scripts/movies.py";
 
-const fetchTrending = async () => {
+const fetchTrending = async (page: number = 1) => {
   setProgressStatus("loading");
   try {
-    const output = await execAsync(`python3 ${scriptPath} --trending --limit 12`);
+    const output = await execAsync(`python3 ${scriptPath} --trending --limit 12 --page ${page}`);
     const data = JSON.parse(output);
     if (data.error) {
       notify({ summary: "Error", body: data.error });
@@ -28,6 +29,7 @@ const fetchTrending = async () => {
       return;
     }
     setMovieList(data);
+    setCurrentPage(page);
     setProgressStatus("success");
   } catch (err) {
     notify({ summary: "Error", body: String(err) });
@@ -35,10 +37,10 @@ const fetchTrending = async () => {
   }
 };
 
-const fetchPopularMovies = async () => {
+const fetchPopularMovies = async (page: number = 1) => {
   setProgressStatus("loading");
   try {
-    const output = await execAsync(`python3 ${scriptPath} --popular-movies --limit 12`);
+    const output = await execAsync(`python3 ${scriptPath} --popular-movies --limit 12 --page ${page}`);
     const data = JSON.parse(output);
     if (data.error) {
       notify({ summary: "Error", body: data.error });
@@ -46,6 +48,7 @@ const fetchPopularMovies = async () => {
       return;
     }
     setMovieList(data);
+    setCurrentPage(page);
     setProgressStatus("success");
   } catch (err) {
     notify({ summary: "Error", body: String(err) });
@@ -53,10 +56,10 @@ const fetchPopularMovies = async () => {
   }
 };
 
-const fetchPopularTV = async () => {
+const fetchPopularTV = async (page: number = 1) => {
   setProgressStatus("loading");
   try {
-    const output = await execAsync(`python3 ${scriptPath} --popular-tv --limit 12`);
+    const output = await execAsync(`python3 ${scriptPath} --popular-tv --limit 12 --page ${page}`);
     const data = JSON.parse(output);
     if (data.error) {
       notify({ summary: "Error", body: data.error });
@@ -64,6 +67,7 @@ const fetchPopularTV = async () => {
       return;
     }
     setMovieList(data);
+    setCurrentPage(page);
     setProgressStatus("success");
   } catch (err) {
     notify({ summary: "Error", body: String(err) });
@@ -71,11 +75,11 @@ const fetchPopularTV = async () => {
   }
 };
 
-const searchMovies = async (query: string) => {
+const searchMovies = async (query: string, page: number = 1) => {
   setProgressStatus("loading");
-  if (!query.trim()) return fetchTrending();
+  if (!query.trim()) return fetchTrending(page);
   try {
-    const output = await execAsync(`python3 ${scriptPath} --search "${query}" --limit 12`);
+    const output = await execAsync(`python3 ${scriptPath} --search "${query}" --limit 12 --page ${page}`);
     const data = JSON.parse(output);
     if (data.error) {
       notify({ summary: "Error", body: data.error });
@@ -83,6 +87,7 @@ const searchMovies = async (query: string) => {
       return;
     }
     setMovieList(data);
+    setCurrentPage(page);
     setProgressStatus("success");
   } catch (err) {
     notify({ summary: "Error", body: String(err) });
@@ -145,7 +150,8 @@ const SearchBar = () => (
       onActivate={(self) => searchMovies(self.get_text())}
     />
     <button
-      label="Search"
+      class="action-button"
+      label=""
       onClicked={() => searchMovies(searchQuery.get())}
     />
   </box>
@@ -153,28 +159,66 @@ const SearchBar = () => (
 
 const TabButtons = () => (
   <box class="tab-buttons" spacing={5}>
-    <button
+    <togglebutton
       class={currentTab((tab) => tab === "Trending" ? "active" : "")}
+      active={currentTab((tab) => tab === "Trending")}
       label="Trending"
-      onClicked={() => {
-        setCurrentTab("Trending");
-        fetchTrending();
+      onToggled={({ active }) => {
+        if (active) {
+          setCurrentTab("Trending");
+          fetchTrending(1);
+        }
       }}
     />
-    <button
+    <togglebutton
       class={currentTab((tab) => tab === "Movies" ? "active" : "")}
+      active={currentTab((tab) => tab === "Movies")}
       label="Movies"
-      onClicked={() => {
-        setCurrentTab("Movies");
-        fetchPopularMovies();
+      onToggled={({ active }) => {
+        if (active) {
+          setCurrentTab("Movies");
+          fetchPopularMovies(1);
+        }
       }}
     />
-    <button
+    <togglebutton
       class={currentTab((tab) => tab === "TV Shows" ? "active" : "")}
+      active={currentTab((tab) => tab === "TV Shows")}
       label="TV Shows"
+      onToggled={({ active }) => {
+        if (active) {
+          setCurrentTab("TV Shows");
+          fetchPopularTV(1);
+        }
+      }}
+    />
+  </box>
+);
+
+const Pagination = () => (
+  <box class="pagination" spacing={5} halign={Gtk.Align.CENTER}>
+    <button
+      class="action-button"
+      label=""
       onClicked={() => {
-        setCurrentTab("TV Shows");
-        fetchPopularTV();
+        const page = Math.max(1, currentPage.get() - 1);
+        if (currentTab.get() === "Trending") fetchTrending(page);
+        else if (currentTab.get() === "Movies") fetchPopularMovies(page);
+        else if (currentTab.get() === "TV Shows") fetchPopularTV(page);
+      }}
+    />
+    <label 
+      class="page-indicator"
+      label={currentPage((p) => `Page ${p}`)} 
+    />
+    <button
+      class="action-button"
+      label=""
+      onClicked={() => {
+        const page = currentPage.get() + 1;
+        if (currentTab.get() === "Trending") fetchTrending(page);
+        else if (currentTab.get() === "Movies") fetchPopularMovies(page);
+        else if (currentTab.get() === "TV Shows") fetchPopularTV(page);
       }}
     />
   </box>
@@ -221,7 +265,7 @@ const MovieGrid = () => (
 );
 
 export default () => {
-  fetchTrending();
+  fetchTrending(1);
 
   return (
     <box
@@ -234,6 +278,7 @@ export default () => {
       <TabButtons />
       <SearchBar />
       <MovieGrid />
+      <Pagination />
     </box>
   );
 };

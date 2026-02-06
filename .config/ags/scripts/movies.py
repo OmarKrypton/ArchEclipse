@@ -80,14 +80,14 @@ class TMDBProvider:
         
         return item
 
-    def search(self, query: str, limit: int = 10) -> List[dict]:
+    def search(self, query: str, limit: int = 10, page: int = 1) -> List[dict]:
         """Search for movies and TV shows"""
         url = f"{BASE_URL}/search/multi"
         params = {
             "query": query,
             "include_adult": "false",
             "language": "en-US",
-            "page": 1
+            "page": page
         }
         
         try:
@@ -104,10 +104,10 @@ class TMDBProvider:
             print(f"Error: {e}", file=sys.stderr)
             return []
 
-    def get_popular_movies(self, limit: int = 10) -> List[dict]:
+    def get_popular_movies(self, limit: int = 10, page: int = 1) -> List[dict]:
         """Get popular movies"""
         url = f"{BASE_URL}/movie/popular"
-        params = {"language": "en-US", "page": 1}
+        params = {"language": "en-US", "page": page}
         
         try:
             response = requests.get(url, headers=self.headers, params=params)
@@ -123,10 +123,10 @@ class TMDBProvider:
             print(f"Error: {e}", file=sys.stderr)
             return []
 
-    def get_popular_tv(self, limit: int = 10) -> List[dict]:
+    def get_popular_tv(self, limit: int = 10, page: int = 1) -> List[dict]:
         """Get popular TV shows"""
         url = f"{BASE_URL}/tv/popular"
-        params = {"language": "en-US", "page": 1}
+        params = {"language": "en-US", "page": page}
         
         try:
             response = requests.get(url, headers=self.headers, params=params)
@@ -142,10 +142,10 @@ class TMDBProvider:
             print(f"Error: {e}", file=sys.stderr)
             return []
 
-    def get_trending(self, limit: int = 10) -> List[dict]:
+    def get_trending(self, limit: int = 10, page: int = 1) -> List[dict]:
         """Get trending movies and shows"""
         url = f"{BASE_URL}/trending/all/week"
-        params = {"language": "en-US"}
+        params = {"language": "en-US", "page": page}
         
         try:
             response = requests.get(url, headers=self.headers, params=params)
@@ -169,6 +169,7 @@ def main():
     parser.add_argument("--popular-tv", action="store_true", help="Get popular TV shows")
     parser.add_argument("--trending", action="store_true", help="Get trending content")
     parser.add_argument("--limit", type=int, default=10, help="Limit results")
+    parser.add_argument("--page", type=int, default=1, help="Page number")
     
     args = parser.parse_args()
     
@@ -189,15 +190,15 @@ def main():
     provider = TMDBProvider(api_key)
     
     if args.search:
-        results = provider.search(args.search, args.limit)
+        results = provider.search(args.search, args.limit, args.page)
     elif args.popular_movies:
-        results = provider.get_popular_movies(args.limit)
+        results = provider.get_popular_movies(args.limit, args.page)
     elif args.popular_tv:
-        results = provider.get_popular_tv(args.limit)
+        results = provider.get_popular_tv(args.limit, args.page)
     elif args.trending:
-        results = provider.get_trending(args.limit)
+        results = provider.get_trending(args.limit, args.page)
     else:
-        results = provider.get_trending(args.limit)
+        results = provider.get_trending(args.limit, args.page)
     
     print(json.dumps(results, indent=2))
 

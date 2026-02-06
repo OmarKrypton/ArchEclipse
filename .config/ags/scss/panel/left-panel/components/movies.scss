@@ -7,17 +7,16 @@
 
     entry {
       background: $background-semi-transparent;
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 8px 12px;
       color: $foreground;
     }
 
     button {
+      @include button;
       background: $blue-background;
-      border-radius: 8px;
-      padding: 8px 16px;
-      color: $foreground;
-
+      min-width: 40px;
+      
       &:hover {
         background: $blue;
       }
@@ -26,21 +25,37 @@
 
   .tab-buttons {
     margin-bottom: 10px;
+    @include module;
 
-    button {
-      background: $background-semi-transparent;
-      border-radius: 8px;
-      padding: 8px 16px;
-      color: $foreground;
+    togglebutton {
+      @include button;
       margin-right: 5px;
 
-      &.active {
-        background: $blue-background;
+      &:checked {
+        background: $foreground-secondary;
+        color: $background;
       }
+    }
+  }
 
+  .pagination {
+    margin-top: 10px;
+    @include module;
+
+    button {
+      @include button;
+      min-width: 40px;
+      background: $background-semi-transparent;
+      
       &:hover {
         background: $background-mix;
       }
+    }
+
+    label {
+      font-size: 0.9em;
+      color: $grey;
+      padding: 0 10px;
     }
   }
 
