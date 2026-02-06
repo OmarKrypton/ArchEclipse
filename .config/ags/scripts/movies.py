@@ -7,49 +7,47 @@ import json
 import sys
 import argparse
 import requests
+import os
 from dataclasses import dataclass, asdict
 from typing import List, Optional
-from abc import ABC, abstractmethod
+from pathlib import Path
 
 API_KEY = "YOUR_TMDB_API_KEY"  # User needs to replace this
 BASE_URL = "https://api.themoviedb.org/3"
 IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
 
-
-@dataclass
-class Movie:
-    id: int
-    title: str
-    overview: str
-    poster_path: Optional[str]
-    backdrop_path: Optional[str]
-    release_date: str
-    vote_average: float
-    media_type: str = "movie"
-
-    def to_json(self):
-        data = asdict(self)
-        data['poster_url'] = f"{IMAGE_BASE_URL}{self.poster_path}" if self.poster_path else None
-        data['backdrop_url'] = f"{IMAGE_BASE_URL}{self.backdrop_path}" if self.backdrop_path else None
-        return data
+# Cache directory for posters
+CACHE_DIR = Path.home() / ".config" / "ags" / "assets" / "movies" / "posters"
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
-@dataclass
-class TVShow:
-    id: int
-    name: str
-    overview: str
-    poster_path: Optional[str]
-    backdrop_path: Optional[str]
-    first_air_date: str
-    vote_average: float
-    media_type: str = "tv"
-
-    def to_json(self):
-        data = asdict(self)
-        data['poster_url'] = f"{IMAGE_BASE_URL}{self.poster_path}" if self.poster_path else None
-        data['backdrop_url'] = f"{IMAGE_BASE_URL}{self.backdrop_path}" if self.backdrop_path else None
-        return data
+def download_poster(poster_path: str, movie_id: int) -> Optional[str]:
+    """Download poster image to cache and return local path"""
+    if not poster_path:
+        return None
+    
+    # Create filename from movie ID
+    filename = f"{movie_id}.jpg"
+    local_path = CACHE_DIR / filename
+    
+    # If already cached, return local path
+    if local_path.exists():
+        return str(local_path)
+    
+    # Download the image
+    image_url = f"{IMAGE_BASE_URL}{poster_path}"
+    try:
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
+        
+        # Save to cache
+        with open(local_path, "wb") as f:
+            f.write(response.content)
+        
+        return str(local_path)
+    except Exception as e:
+        print(f"Failed to download poster for {movie_id}: {e}", file=sys.stderr)
+        return None
 
 
 class TMDBProvider:
@@ -59,6 +57,28 @@ class TMDBProvider:
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
+
+    def process_item(self, item: dict) -> dict:
+        """Process item and download poster"""
+        # Ensure media_type is set
+        if "media_type" not in item:
+            item["media_type"] = "movie" if "title" in item else "tv"
+        
+        # Download poster and update poster_path to local path
+        movie_id = item.get("id", 0)
+        poster_path = item.get("poster_path")
+        
+        if poster_path:
+            local_poster = download_poster(poster_path, movie_id)
+            if local_poster:
+                item["poster_path"] = local_poster
+            else:
+                item["poster_path"] = None
+        
+        # Also create poster_url field for compatibility
+        item["poster_url"] = item.get("poster_path")
+        
+        return item
 
     def search(self, query: str, limit: int = 10) -> List[dict]:
         """Search for movies and TV shows"""
@@ -78,7 +98,7 @@ class TMDBProvider:
             results = []
             for item in data.get("results", [])[:limit]:
                 if item.get("media_type") in ["movie", "tv"]:
-                    results.append(item)
+                    results.append(self.process_item(item))
             return results
         except Exception as e:
             print(f"Error: {e}", file=sys.stderr)
@@ -97,7 +117,7 @@ class TMDBProvider:
             results = []
             for item in data.get("results", [])[:limit]:
                 item["media_type"] = "movie"
-                results.append(item)
+                results.append(self.process_item(item))
             return results
         except Exception as e:
             print(f"Error: {e}", file=sys.stderr)
@@ -116,7 +136,7 @@ class TMDBProvider:
             results = []
             for item in data.get("results", [])[:limit]:
                 item["media_type"] = "tv"
-                results.append(item)
+                results.append(self.process_item(item))
             return results
         except Exception as e:
             print(f"Error: {e}", file=sys.stderr)
@@ -135,7 +155,7 @@ class TMDBProvider:
             results = []
             for item in data.get("results", [])[:limit]:
                 if item.get("media_type") in ["movie", "tv"]:
-                    results.append(item)
+                    results.append(self.process_item(item))
             return results
         except Exception as e:
             print(f"Error: {e}", file=sys.stderr)
@@ -155,7 +175,6 @@ def main():
     # Try to load API key from config file
     api_key = API_KEY
     try:
-        import os
         config_path = os.path.expanduser("~/.config/ags/assets/tmdb_api_key.txt")
         if os.path.exists(config_path):
             with open(config_path, "r") as f:
