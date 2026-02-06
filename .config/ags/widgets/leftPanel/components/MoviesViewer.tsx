@@ -9,13 +9,11 @@ import Gdk from "gi://Gdk?version=4.0";
 import { globalSettings, globalTransition } from "../../../variables";
 
 const [movieList, setMovieList] = createState<Movie[]>([]);
-const [selectedMovie, setSelectedMovie] = createState<Movie | null>(null);
 const [progressStatus, setProgressStatus] = createState<
   "loading" | "error" | "success" | "idle"
 >("idle");
 const [currentTab, setCurrentTab] = createState<string>("Trending");
 const [searchQuery, setSearchQuery] = createState<string>("");
-const [initialized, setInitialized] = createState(false);
 
 const scriptPath = "./scripts/movies.py";
 
@@ -96,10 +94,8 @@ const openInStremio = (movie: Movie) => {
   const title = movie.title || movie.name || "";
   const year = movie.release_date?.split("-")[0] || movie.first_air_date?.split("-")[0] || "";
   
-  // Try to open in Stremio if available, otherwise open in browser
   execAsync(`bash -c 'command -v stremio && stremio "https://web.stremio.com/#/search?search=${encodeURIComponent(title)}" || xdg-open "https://web.stremio.com/#/search?search=${encodeURIComponent(title)}"'`)
     .catch(() => {
-      // Fallback to TMDB page
       const type = movie.media_type === "tv" ? "tv" : "movie";
       execAsync(`xdg-open "https://www.themoviedb.org/${type}/${movie.id}"`);
     });
@@ -184,35 +180,38 @@ const TabButtons = () => (
   </box>
 );
 
-const MovieGrid = () => (
-  <Gtk.ScrolledWindow 
-    vexpand 
-    hscrollbarPolicy={Gtk.PolicyType.NEVER}
-    vscrollbarPolicy={Gtk.PolicyType.AUTOMATIC}
-  >
-    <box class="movie-grid" orientation={Gtk.Orientation.VERTICAL} spacing={15}>
-      <For each={movieList}>
-        {(movie, index) => {
-          // Group movies into rows of 2
-          if (index.get() % 2 === 0) {
-            const rowMovies = movieList.get().slice(index.get(), index.get() + 2);
-            return (
-              <box spacing={10} homogeneous>
-                {rowMovies.map((m) => (
-                  <MovieCard movie={m} />
-                ))}
-              </box>
-            );
-          }
-          return null;
-        }}
-      </For>
-    </box>
-  </Gtk.ScrolledWindow>
-);
+const MovieGrid = () => {
+  const rows: Movie[][] = [];
+  const movies = movieList.get();
+  
+  if (movies && Array.isArray(movies)) {
+    for (let i = 0; i < movies.length; i += 2) {
+      rows.push(movies.slice(i, i + 2));
+    }
+  }
+
+  return (
+    <Gtk.ScrolledWindow 
+      vexpand 
+      hscrollbarPolicy={Gtk.PolicyType.NEVER}
+      vscrollbarPolicy={Gtk.PolicyType.AUTOMATIC}
+    >
+      <box class="movie-grid" orientation={Gtk.Orientation.VERTICAL} spacing={15}>
+        <For each={createState(rows)}>
+          {(row) => (
+            <box spacing={10} homogeneous>
+              {row.map((movie) => (
+                <MovieCard movie={movie} />
+              ))}
+            </box>
+          )}
+        </For>
+      </box>
+    </Gtk.ScrolledWindow>
+  );
+};
 
 export default () => {
-  // Always fetch fresh data when component mounts
   fetchTrending();
 
   return (
