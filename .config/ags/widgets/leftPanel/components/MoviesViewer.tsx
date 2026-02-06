@@ -197,18 +197,23 @@ const MovieGrid = () => (
             return <box />;
           }
           
-          const rows: JSX.Element[] = [];
-          for (let i = 0; i < movies.length; i += 2) {
-            const rowMovies = movies.slice(i, i + 2);
-            rows.push(
-              <box spacing={10} homogeneous>
-                {rowMovies.map((movie) => (
-                  <MovieCard movie={movie} />
-                ))}
-              </box>
-            );
-          }
-          return <>{rows}</>;
+          return (
+            <box orientation={Gtk.Orientation.VERTICAL} spacing={15}>
+              {movies.reduce((acc: JSX.Element[], movie, idx) => {
+                if (idx % 2 === 0) {
+                  const rowMovies = movies.slice(idx, idx + 2);
+                  acc.push(
+                    <box spacing={10} homogeneous>
+                      {rowMovies.map((m) => (
+                        <MovieCard movie={m} />
+                      ))}
+                    </box>
+                  );
+                }
+                return acc;
+              }, [])}
+            </box>
+          );
         }}
       </With>
     </box>
