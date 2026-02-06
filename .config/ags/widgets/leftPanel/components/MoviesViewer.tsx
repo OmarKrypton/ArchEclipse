@@ -212,8 +212,10 @@ const MovieGrid = () => (
 );
 
 export default () => {
-  // Always fetch when component mounts
-  fetchTrending();
+  // Fetch only if movieList is empty (on first load or after being cleared)
+  if (movieList.get().length === 0 && progressStatus.get() === "idle") {
+    fetchTrending();
+  }
 
   return (
     <box
