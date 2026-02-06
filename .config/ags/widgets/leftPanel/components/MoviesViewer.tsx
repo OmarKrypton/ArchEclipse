@@ -201,9 +201,9 @@ const MovieGrid = () => (
           for (let i = 0; i < movies.length; i += 2) {
             const rowMovies = movies.slice(i, i + 2);
             rows.push(
-              <box key={i} spacing={10} homogeneous>
-                {rowMovies.map((movie, idx) => (
-                  <MovieCard key={`${movie.id}-${idx}`} movie={movie} />
+              <box spacing={10} homogeneous>
+                {rowMovies.map((movie) => (
+                  <MovieCard movie={movie} />
                 ))}
               </box>
             );
