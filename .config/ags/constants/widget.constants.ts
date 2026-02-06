@@ -135,7 +135,7 @@ export const leftPanelWidgetSelectors: WidgetSelector[] = [
   },
   {
     name: "MoviesViewer",
-    icon: "",
+    icon: "󰿏",
     widget: () => MoviesViewer(),
     enabled: false,
   },
