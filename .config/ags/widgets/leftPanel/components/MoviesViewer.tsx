@@ -190,39 +190,24 @@ const MovieGrid = () => (
     hscrollbarPolicy={Gtk.PolicyType.NEVER}
     vscrollbarPolicy={Gtk.PolicyType.AUTOMATIC}
   >
-    <Gtk.FlowBox
-      class="movie-grid"
-      homogeneous={true}
-      selectionMode={Gtk.SelectionMode.NONE}
-      maxChildrenPerLine={3}
-      rowSpacing={15}
-      columnSpacing={10}
-      $={(self) => {
-        // Subscribe to movieList changes
-        movieList.subscribe((movies) => {
-          // Clear existing children
-          let child = self.get_first_child();
-          while (child) {
-            const next = child.get_next_sibling();
-            self.remove(child);
-            child = next;
+    <box class="movie-grid" orientation={Gtk.Orientation.VERTICAL} spacing={15}>
+      <For each={movieList}>
+        {(movie, index) => {
+          // Group movies into rows of 3
+          if (index.get() % 3 === 0) {
+            const rowMovies = movieList.get().slice(index.get(), index.get() + 3);
+            return (
+              <box spacing={10} homogeneous>
+                {rowMovies.map((m) => (
+                  <MovieCard movie={m} />
+                ))}
+              </box>
+            );
           }
-          
-          // Check if movies is valid
-          if (!movies || !Array.isArray(movies)) {
-            return;
-          }
-          
-          // Add movie cards
-          movies.forEach((movie) => {
-            const card = MovieCard({ movie });
-            self.append(card);
-          });
-          
-          self.show_all();
-        });
-      }}
-    />
+          return null;
+        }}
+      </For>
+    </box>
   </Gtk.ScrolledWindow>
 );
 
