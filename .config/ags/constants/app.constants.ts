@@ -65,8 +65,8 @@ export const quickApps: LauncherApp[] = [
   },
   {
     app_name: "Browser",
-    app_launch: () => execAsync("xdg-open https://google.com"),
-    app_icon: "",
+    app_launch: () => execAsync("firefox"),
+    app_icon: "",
   },
   {
     app_name: "Terminal",
