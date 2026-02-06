@@ -28,6 +28,7 @@ const workspaceIconMap: { [name: string]: string } = {
   spotube: "",
   systemmonitor: "",
   discord: "󰙯",
+  "discord- ptb": "󰙯",
   vencord: "󰙯",
   legcord: "󰙯",
   vesktop: "󰙯",
