@@ -212,17 +212,18 @@ const MovieGrid = () => (
 );
 
 export default () => {
-  // Fetch only if movieList is empty (on first load or after being cleared)
-  if (movieList.get().length === 0 && progressStatus.get() === "idle") {
-    fetchTrending();
-  }
-
   return (
     <box
       orientation={Gtk.Orientation.VERTICAL}
       class="movies-viewer"
       spacing={10}
       vexpand
+      $={(self) => {
+        // Fetch data when component mounts (widget becomes visible)
+        if (movieList.get().length === 0) {
+          fetchTrending();
+        }
+      }}
     >
       <Progress status={progressStatus} />
       <TabButtons />
