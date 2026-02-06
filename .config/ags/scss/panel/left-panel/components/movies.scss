@@ -1,90 +1,74 @@
 .movies-viewer {
-  padding: 10px;
+  padding: 5px;
 
   .search-bar {
-    margin-bottom: 10px;
+    margin-bottom: 5px;
+    @include module;
 
     entry {
-      background: $surface;
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: $text;
-
-      &:focus {
-        box-shadow: 0 0 0 2px $primary;
-      }
+      background: $background-semi-transparent;
+      border-radius: $border-radius;
+      padding: 8px;
+      color: $foreground;
     }
 
     button {
-      background: $primary;
-      border-radius: 8px;
+      background: $blue-background;
+      border-radius: $border-radius;
       padding: 8px 16px;
-      color: $on-primary;
+      color: $foreground;
 
       &:hover {
-        background: lighten($primary, 10%);
+        background: $blue;
       }
     }
   }
 
   .tab-buttons {
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 
     button {
-      background: $surface;
-      border-radius: 8px;
+      background: $background-semi-transparent;
+      border-radius: $border-radius;
       padding: 8px 16px;
-      color: $text;
+      color: $foreground;
 
       &.active {
-        background: $primary;
-        color: $on-primary;
+        background: $blue-background;
       }
 
       &:hover {
-        background: lighten($surface, 5%);
+        background: $background-mix;
       }
     }
   }
 
   .movie-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: flex-start;
+    spacing: 10px;
   }
 
   .movie-card {
-    background: $surface;
-    border-radius: 12px;
+    background: $background-semi-transparent;
+    border-radius: $border-radius * 1.5;
     padding: 8px;
     min-width: 120px;
-    max-width: 120px;
 
     &:hover {
-      background: lighten($surface, 5%);
-      transform: scale(1.02);
+      background: $background-mix;
     }
 
     image {
-      border-radius: 8px;
+      border-radius: $border-radius;
     }
 
     label {
       font-size: 0.85em;
-      text-align: center;
+      margin-top: 5px;
 
       &.movie-meta {
         font-size: 0.75em;
-        color: $text-muted;
+        color: $grey;
       }
     }
-  }
-
-  .movie-placeholder {
-    background: $surface-variant;
-    border-radius: 8px;
-    min-height: 150px;
-    min-width: 100px;
   }
 }
