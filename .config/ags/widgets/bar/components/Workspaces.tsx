@@ -35,6 +35,7 @@ const workspaceIconMap: { [name: string]: string } = {
   steam: "󰓓",
   lutris: "",
   game: "",
+  "com.stremio.stremio": "󰿏",
 };
 
 // const workspaceRegexIconMap: { [regex: RegExp]: string } = {
