@@ -66,7 +66,7 @@ export const quickApps: LauncherApp[] = [
   {
     app_name: "Browser",
     app_launch: () => execAsync("firefox"),
-    app_icon: "",
+    app_icon: "󰈹",
   },
   {
     app_name: "Terminal",
