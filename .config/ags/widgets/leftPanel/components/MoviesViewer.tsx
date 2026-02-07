@@ -98,9 +98,13 @@ const searchMovies = async (query: string, page: number = 1) => {
 
 const openInStremio = (movie: Movie) => {
   const title = movie.title || movie.name || "";
-  const year = movie.release_date?.split("-")[0] || movie.first_air_date?.split("-")[0] || "";
+  const year =
+    movie.release_date?.split("-")[0] ||
+    movie.first_air_date?.split("-")[0] ||
+    "";
+  const query = `${title} ${year}`.trim();
 
-  execAsync(`bash -c 'command -v stremio && stremio "https://web.stremio.com/#/search?search=${encodeURIComponent(title)}" || xdg-open "https://web.stremio.com/#/search?search=${encodeURIComponent(title)}"'`)
+  execAsync(`xdg-open "stremio:///search?search=${encodeURIComponent(query)}"`)
     .catch(() => {
       const type = movie.media_type === "tv" ? "tv" : "movie";
       execAsync(`xdg-open "https://www.themoviedb.org/${type}/${movie.id}"`);
