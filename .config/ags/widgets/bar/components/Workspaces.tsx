@@ -8,6 +8,7 @@ import { hideWindow, showWindow } from "../../../utils/window";
 import { For } from "ags";
 import { Accessor } from "ags";
 import app from "ags/gtk4/app";
+import { workspaceClientLayout } from "../../../utils/workspace";
 
 const hyprland = Hyprland.get_default();
 
@@ -28,7 +29,7 @@ const workspaceIconMap: { [name: string]: string } = {
   spotube: "",
   systemmonitor: "",
   discord: "󰙯",
-  "discord- ptb": "󰙯",
+  "discord-ptb": "󰙯",
   vencord: "󰙯",
   legcord: "󰙯",
   vesktop: "󰙯",
@@ -128,14 +129,64 @@ function Workspaces() {
         onClicked={() =>
           hyprland.message_async(`dispatch workspace ${id}`, () => { })
         }
-        // tooltipMarkup={`switch to workspace ${id} [${client_class}]`}
-        tooltipMarkup={`Workspace ${id} [${client_class}]\n<b>SUPER + ${id}</b>`}
+        $={(self) => {
+          // --- POPOVER ---
+          const popover = new Gtk.Popover({
+            has_arrow: true,
+            position: Gtk.PositionType.BOTTOM,
+            autohide: false,
+          });
+
+          popover.set_child(workspaceClientLayout(id));
+          popover.set_parent(self);
+
+          // --- HOVER LOGIC ---
+          let hideTimeout: number | null = null;
+
+          // Button hover controller
+          const buttonMotion = new Gtk.EventControllerMotion();
+
+          buttonMotion.connect("enter", () => {
+            if (hideTimeout) {
+              clearTimeout(hideTimeout);
+              hideTimeout = null;
+            }
+            popover.show();
+          });
+
+          buttonMotion.connect("leave", () => {
+            // Delay hiding to allow moving to popover
+            hideTimeout = setTimeout(() => {
+              popover.hide();
+              hideTimeout = null;
+            }, 50) as any;
+          });
+
+          self.add_controller(buttonMotion);
+
+          // Popover hover controller
+          const popoverMotion = new Gtk.EventControllerMotion();
+
+          popoverMotion.connect("enter", () => {
+            if (hideTimeout) {
+              clearTimeout(hideTimeout);
+              hideTimeout = null;
+            }
+          });
+
+          popoverMotion.connect("leave", () => {
+            popover.hide();
+          });
+
+          popover.add_controller(popoverMotion);
+        }}
       />
     );
   };
 
   // Reactive workspace state that updates when workspaces or focus changes
   const workspaces: Accessor<any[]> = createComputed(() => {
+    print("workspace");
     const workspaces = createBinding(hyprland, "workspaces")();
     const currentWorkspace = focusedWorkspace().id;
 
