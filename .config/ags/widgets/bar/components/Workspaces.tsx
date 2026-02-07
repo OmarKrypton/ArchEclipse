@@ -134,51 +134,28 @@ function Workspaces() {
           const popover = new Gtk.Popover({
             has_arrow: true,
             position: Gtk.PositionType.BOTTOM,
+
+            // THIS is the important part
             autohide: false,
           });
 
           popover.set_child(workspaceClientLayout(id));
+
+          // popover must have a parent in GTK4
           popover.set_parent(self);
 
           // --- HOVER LOGIC ---
-          let hideTimeout: number | null = null;
+          const motion = new Gtk.EventControllerMotion();
 
-          // Button hover controller
-          const buttonMotion = new Gtk.EventControllerMotion();
-
-          buttonMotion.connect("enter", () => {
-            if (hideTimeout) {
-              clearTimeout(hideTimeout);
-              hideTimeout = null;
-            }
-            popover.show();
+          motion.connect("enter", () => {
+            popover.show(); // not popup()
           });
 
-          buttonMotion.connect("leave", () => {
-            // Delay hiding to allow moving to popover
-            hideTimeout = setTimeout(() => {
-              popover.hide();
-              hideTimeout = null;
-            }, 50) as any;
+          motion.connect("leave", () => {
+            popover.hide(); // not popdown()
           });
 
-          self.add_controller(buttonMotion);
-
-          // Popover hover controller
-          const popoverMotion = new Gtk.EventControllerMotion();
-
-          popoverMotion.connect("enter", () => {
-            if (hideTimeout) {
-              clearTimeout(hideTimeout);
-              hideTimeout = null;
-            }
-          });
-
-          popoverMotion.connect("leave", () => {
-            popover.hide();
-          });
-
-          popover.add_controller(popoverMotion);
+          self.add_controller(motion);
         }}
       />
     );
@@ -186,7 +163,6 @@ function Workspaces() {
 
   // Reactive workspace state that updates when workspaces or focus changes
   const workspaces: Accessor<any[]> = createComputed(() => {
-    print("workspace");
     const workspaces = createBinding(hyprland, "workspaces")();
     const currentWorkspace = focusedWorkspace().id;
 
