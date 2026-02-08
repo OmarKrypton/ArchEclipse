@@ -111,12 +111,12 @@ const Help = () => (
               <label
                 label={command}
                 class="command"
-                // ellipsize={Gtk.EllipsizeMode.END}
+              // ellipsize={Gtk.EllipsizeMode.END}
               />
               <label
                 label={description}
                 class="description"
-                // ellipsize={Gtk.EllipsizeMode.END}
+              // ellipsize={Gtk.EllipsizeMode.END}
               />
             </box>
           ))}
@@ -244,12 +244,10 @@ const Entry = () => (
                   app_type: "app",
                   app_arg: args.join(" "),
                   app_launch: () =>
-                    !args.join("") && app.executable !== "thunar"
-                      ? app.launch()
-                      : hyprland.message_async(
-                          `dispatch exec ${app.executable} ${args.join(" ")}`,
-                          () => {},
-                        ),
+                    hyprland.message_async(
+                      `dispatch exec ${app.executable.replace(/%./g, "")} ${args.join(" ")}`,
+                      () => { },
+                    ),
                 })),
             );
             if (Results.get().length === 0) {
@@ -260,7 +258,7 @@ const Entry = () => (
                   app_launch: () =>
                     hyprland.message_async(
                       `dispatch exec foot 'bash -c "${text}"'`,
-                      () => {},
+                      () => { },
                     ),
                 },
               ]);
