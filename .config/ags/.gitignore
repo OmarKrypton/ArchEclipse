@@ -3,8 +3,13 @@ types
 @girs
 node_modules
 
+!assets/
+
 assets/binaries/*
 !assets/binaries/
+
+assets/thumbnails/*
+!assets/thumbnails/
 
 assets/settings/*
 !assets/settings/
