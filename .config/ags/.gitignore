@@ -3,13 +3,8 @@ types
 @girs
 node_modules
 
-!assets/
-
 assets/binaries/*
 !assets/binaries/
-
-assets/thumbnails/*
-!assets/thumbnails/
 
 assets/settings/*
 !assets/settings/
@@ -28,5 +23,8 @@ assets/crypto/*
 
 assets/manga/*
 !assets/manga/
+
+assets/movies/posters/*
+!assets/movies/posters/
 
 logs
