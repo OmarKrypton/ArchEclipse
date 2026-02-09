@@ -3,7 +3,7 @@ import Gdk from "gi://Gdk?version=4.0";
 import { focusedWorkspace, specialWorkspace } from "../../../variables";
 
 import Hyprland from "gi://AstalHyprland";
-import { createBinding, createComputed } from "ags";
+import { createBinding, createComputed, createState } from "ags";
 import { hideWindow, showWindow } from "../../../utils/window";
 import { For } from "ags";
 import { Accessor } from "ags";
@@ -14,6 +14,7 @@ import { Gdk } from "ags/gtk4";
 import GObject from "ags/gobject";
 
 const hyprland = Hyprland.get_default();
+const [refreshValue, setRefreshValue] = createState(0);
 
 const workspaceIconMap: { [name: string]: string } = {
   special: "",
@@ -206,7 +207,11 @@ function Workspaces() {
             print("dropped PID:", pid);
             hyprland.message_async(
               `dispatch movetoworkspacesilent ${id}, pid:${pid}`,
-              () => { },
+              () => {
+                timeout(300, () => {
+                  setRefreshValue(refreshValue.peek() + 1);
+                });
+              },
             );
 
             return true;
@@ -221,13 +226,19 @@ function Workspaces() {
   // Reactive workspace state that updates when workspaces or focus changes
   const workspaces: Accessor<any[]> = createComputed(() => {
     print("workspace");
+    refreshValue(); // Connect to manual refresh signal
+
+    const clients = createBinding(hyprland, "clients")();
     const workspaces = createBinding(hyprland, "workspaces")();
     const currentWorkspace = focusedWorkspace().id;
 
-    // Get array of active workspace IDs
-    const workspaceIds = workspaces.map((w) => w.id);
+    // Get array of active workspace IDs from clients
+    const workspaceIds = [...new Set(clients.map((c) => c.workspace.id))];
     // Calculate total workspaces needed (active ones or maxWorkspaces, whichever is larger)
-    const totalWorkspaces = Math.max(...workspaceIds, maxWorkspaces);
+    const totalWorkspaces = Math.max(
+      ...workspaceIds.filter((id) => id > 0),
+      maxWorkspaces,
+    );
     // Create array of all workspace IDs [1, 2, ..., totalWorkspaces]
     const allWorkspaces = Array.from(
       { length: totalWorkspaces },
@@ -274,7 +285,7 @@ function Workspaces() {
       const isActive = workspaceIds.includes(id);
       const isFocused = currentWorkspace === id;
 
-      const main_client = workspaces.find((w) => w.id === id)?.get_clients()[0];
+      const main_client = clients.find((c) => c.workspace.id === id);
       const client_class = main_client?.class.toLowerCase() || "empty";
 
       if (isActive) {
@@ -416,7 +427,11 @@ const Special = () => (
         print("dropped PID:", pid);
         hyprland.message_async(
           `dispatch movetoworkspacesilent special, pid:${pid}`,
-          () => { },
+          () => {
+            timeout(300, () => {
+              setRefreshValue(refreshValue.peek() + 1);
+            });
+          },
         );
 
         return true;
