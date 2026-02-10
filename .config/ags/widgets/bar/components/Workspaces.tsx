@@ -1,4 +1,3 @@
-import Gtk from "gi://Gtk?version=4.0";
 import { focusedWorkspace, specialWorkspace } from "../../../variables";
 
 import Hyprland from "gi://AstalHyprland";
@@ -9,7 +8,7 @@ import { Accessor } from "ags";
 import app from "ags/gtk4/app";
 import { workspaceClientLayout } from "../../../utils/workspace";
 import { timeout, Timer } from "ags/time";
-import { Gdk } from "ags/gtk4";
+import { Gtk, Gdk } from "ags/gtk4";
 import GObject from "ags/gobject";
 
 const hyprland = Hyprland.get_default();
