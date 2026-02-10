@@ -40,6 +40,7 @@ const workspaceIconMap: { [name: string]: string } = {
   "com.stremio.stremio": "󰿏",
 };
 
+
 // const workspaceRegexIconMap: { [regex: RegExp]: string } = {
 //   // all that ends with "cord"
 //   "/cord$/": "󰙯",
@@ -202,9 +203,12 @@ function Workspaces() {
             actions: Gdk.DragAction.MOVE,
           });
 
-          dropTarget.set_gtypes([GObject.TYPE_INT]);
+          dropTarget.set_gtypes([GObject.TYPE_OBJECT]);
 
           dropTarget.connect("enter", () => {
+            // Tooltip
+            self.set_tooltip_markup(`Move to <b>Workspace ${id}</b>`);
+
             if (hideTimeout) {
               hideTimeout.cancel();
             }
@@ -213,12 +217,15 @@ function Workspaces() {
           });
 
           dropTarget.connect("leave", () => {
+            // Disable Tooltip
+            self.set_tooltip_markup("");
+
             popover.hide();
           });
 
-          dropTarget.connect("drop", (_, value: number) => {
+          dropTarget.connect("drop", (_, value: Hyprland.Client) => {
             print("DROP TARGET DROP");
-            const pid = value;
+            const pid = value.pid;
             print("dropped PID:", pid);
             hyprland.message_async(
               `dispatch movetoworkspacesilent ${id}, pid:${pid}`,
@@ -367,9 +374,9 @@ const Special = () => (
 
       dropTarget.set_gtypes([GObject.TYPE_INT]);
 
-      dropTarget.connect("drop", (_, value: number) => {
+      dropTarget.connect("drop", (_, value: Hyprland.Client) => {
         print("DROP TARGET DROP");
-        const pid = value;
+        const pid = value.pid;
         print("dropped PID:", pid);
         hyprland.message_async(
           `dispatch movetoworkspacesilent special, pid:${pid}`,
