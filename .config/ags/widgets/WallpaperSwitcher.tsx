@@ -126,48 +126,6 @@ function Display() {
       </With>
     </box>
   );
-  //   <box hexpand={true} vexpand={true} halign={Gtk.Align.CENTER} spacing={10}>
-  //     <For each={currentWallpapers}>
-  //       {(wallpaper) => {
-  //         print("Rendering workspace wallpaper:", wallpaper);
-  //         // const workspaceId = key.peek() + 1;
-  //         // random
-  //         const workspaceId = 1;
-
-  //         return (
-  //           <button
-  //             class={focusedWorkspace((workspace) => {
-  //               const i = workspace?.id || 1;
-  //               return i === workspaceId
-  //                 ? "wallpaper-button focused"
-  //                 : "wallpaper-button";
-  //             })}
-  //             css={wallpaper == "" ? "background-color: black" : ""}
-  //             onClicked={(self) => {
-  //               setTargetType("workspace");
-  //               setSelectedWorkspaceId(workspaceId);
-  //             }}
-  //             // tooltipMarkup={`Set wallpaper for <b>Workspace ${workspaceId}</b>`}
-  //           >
-  //             {wallpaper == "" ? (
-  //               <label
-  //                 class="no-wallpaper"
-  //                 label="No Wallpaper"
-  //                 halign={Gtk.Align.CENTER}
-  //                 valign={Gtk.Align.CENTER}
-  //               />
-  //             ) : (
-  //               <Picture
-  //                 class="wallpaper"
-  //                 file={toThumbnailPath(wallpaper)}
-  //               ></Picture>
-  //             )}
-  //           </button>
-  //         ) as Gtk.Button;
-  //       }}
-  //     </For>
-  //   </box>
-  // );
 
   const allWallpapersDisplay = (
     <Gtk.ScrolledWindow
@@ -185,9 +143,8 @@ function Display() {
               const command = {
                 sddm: `pkexec sh -c 'sed -i "s|^background=.*|background=\"${wallpaper}\"|" /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf'`,
                 lockscreen: `bash -c "mkdir -p $HOME/.config/wallpapers/lockscreen && cp ${wallpaper} $HOME/.config/wallpapers/lockscreen/wallpaper"`,
-                workspace: `bash -c "$HOME/.config/hypr/hyprpaper/set-wallpaper.sh ${selectedWorkspaceId.peek()} ${
-                  (self.get_root() as any).monitorName
-                } ${wallpaper}"`,
+                workspace: `bash -c "$HOME/.config/hypr/hyprpaper/set-wallpaper.sh ${selectedWorkspaceId.peek()} ${(self.get_root() as any).monitorName
+                  } ${wallpaper}"`,
               }[target];
 
               execAsync(command!)
@@ -309,11 +266,10 @@ function Display() {
         setProgressStatus("loading");
         const randomWallpaper =
           allWallpapers.peek()[
-            Math.floor(Math.random() * allWallpapers.peek().length)
+          Math.floor(Math.random() * allWallpapers.peek().length)
           ];
         execAsync(
-          `bash -c "$HOME/.config/hypr/hyprpaper/set-wallpaper.sh ${selectedWorkspaceId.peek()} ${
-            (self.get_root() as any).monitorName
+          `bash -c "$HOME/.config/hypr/hyprpaper/set-wallpaper.sh ${selectedWorkspaceId.peek()} ${(self.get_root() as any).monitorName
           } ${randomWallpaper}"`,
         )
           .finally(() => {
@@ -361,8 +317,7 @@ function Display() {
       class="selected-workspace"
       label={createComputed(
         () =>
-          `Wallpaper -> ${targetType()} ${
-            targetType() === "workspace" ? selectedWorkspaceId() : ""
+          `Wallpaper -> ${targetType()} ${targetType() === "workspace" ? selectedWorkspaceId() : ""
           }`,
       )}
       $={(self) =>
@@ -447,10 +402,30 @@ function Display() {
     />
   );
 
+  const displayColorScheme = (
+    <box
+      class="color-scheme"
+      spacing={10}
+      tooltipMarkup={`Dynamic Colors from <b>Pywal</b>`}
+    >
+      {/* from 1 to 7 */}
+      {[1, 2, 3, 4, 5, 6, 7].map((color, index) => (
+        <label
+          label={""}
+          class="color"
+          css={`
+            color: var(--color${color});
+          `}
+        ></label>
+      ))}
+    </box>
+  );
+
   const actions = (
     <box class="actions" hexpand={true} halign={Gtk.Align.CENTER} spacing={10}>
       {targetButtons}
       {selectedWorkspaceLabel}
+      {displayColorScheme}
       {customToggle}
       {randomButton}
       {resetButton}

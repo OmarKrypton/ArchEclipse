@@ -23,6 +23,7 @@
     &.preview {
       min-height: 100px;
       min-width: 75px;
+
       &:hover {
         min-width: 150px;
       }
@@ -34,32 +35,43 @@
     margin: 5px;
     padding: 0px;
   }
+
   .actions {
+    .color-scheme {
+      @include button;
+    }
+
     .selected-workspace {
       @include button;
+
       &.ping {
         animation: ping 0.2s ease-out;
+
         @keyframes ping {
           0% {
             background-color: $foreground;
           }
-          50% {
-          }
-          100% {
-          }
+
+          50% {}
+
+          100% {}
         }
       }
     }
+
     .targets {
       button {
         border-radius: 0px;
       }
+
       button:first-child {
         border-radius: 50px 0px 0px 50px;
       }
+
       button:only-child {
         border-radius: 0px;
       }
+
       button:last-child {
         border-radius: 0px 50px 50px 0px;
       }
